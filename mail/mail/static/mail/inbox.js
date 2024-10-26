@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
-
+  //process the email when the form is submitted
   document.querySelector('#compose-form').addEventListener('submit', send_email); 
 
   // By default, load the inbox
@@ -26,20 +26,13 @@ function compose_email() {
 
 //needed to display the submit the form
 function send_email(event) {
-  console.log("send_email function called");
   event.preventDefault(); // Prevent default form submission
-
-  console.log("the form was submitted");
-  
   //get the values from the form
-  let email_recipients = event.target['compose-recipients'].value; //TODO allow for multiple recipients  
+  let email_recipients = event.target['compose-recipients'].value; //no need to separate the recipients - this is done in the views.py  
   let email_subject = event.target['compose-subject'].value;
   let email_body = event.target['compose-body'].value;
 
-  console.log("recipients: " + email_recipients);
-  console.log("subject: " + email_subject);
-  console.log("body: " + email_body); 
-
+  //handling of the empty recipient fieldand the case of empty email body is done in the views.py 
   //POSTing to the /emails 
   fetch('/emails', {
     method: 'POST',
@@ -57,8 +50,6 @@ function send_email(event) {
       load_mailbox('sent'); //load the list of sent emails
   });
 
-  //display the sent view
-  load_mailbox('sent');
 }
 
 function load_mailbox(mailbox) {
