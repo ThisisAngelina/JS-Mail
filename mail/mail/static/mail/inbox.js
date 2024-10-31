@@ -105,9 +105,117 @@ function load_mailbox(mailbox) {
       emailDiv.appendChild(subjectSpan);
       emailDiv.appendChild(timestampSpan);
 
+      //add an event listener to the email for the view_email function
+
+      emailDiv.addEventListener('click', () => view_email(email.id));
+
 
     });
   });
 
 }
+
+
+//view a particualar email's content
+//the function is called within the laod_mailbox function
+function view_email(email_id){
+  //hide all the unneeded divs
+  document.querySelector('#emails-view').style.dispaly = 'none';
+  document.querySelector('#compose-view').style.display = 'none';
+
+
+  //TODO clear the detailedView from a previously clicked email
+  
+  //create a new div for the detailed email view
+  let detailedDiv = document.createElement('div');
+  detailedDiv.className = 'detailedDiv';
+  detailedDiv.style.border = '1px solid grey';
+  detailedDiv.style.padding = '10px';
+  document.body.appendChild(detailedDiv);
+     
+  //create the "from" <p> with two inline <span>s
+  let fromLine = document.createElement('p');
+  
+  detailedDiv.appendChild(fromLine);
+   
+  let fromSpanTitle = document.createElement('span');
+  fromSpanTitle.textContent = 'From: ';
+  fromSpanTitle.style.fontWeight = 'bold';
+  fromLine.appendChild(fromSpanTitle);
+
+  let fromSpanContent = document.createElement('span');
+  fromLine.appendChild(fromSpanContent);
+
+   //create the "tp" <p> with two inline <span>s
+   let toLine = document.createElement('p');
+   detailedDiv.appendChild(toLine);
+    
+   let toSpanTitle = document.createElement('span');
+   toSpanTitle.textContent = 'To: ';
+   toSpanTitle.style.fontWeight = 'bold';
+   toLine.appendChild(toSpanTitle);
+ 
+   let toSpanContent = document.createElement('span');
+   toLine.appendChild(toSpanContent);
+
+   //create the "subject" <p> with two inline <span>s
+   let subjectLine = document.createElement('p');
+   detailedDiv.appendChild(subjectLine);
+    
+   let subjectSpanTitle = document.createElement('span');
+    subjectSpanTitle.textContent = 'Subject: ';
+    subjectSpanTitle.style.fontWeight = 'bold';
+    subjectLine.appendChild(subjectSpanTitle);
+ 
+   let subjectSpanContent = document.createElement('span');
+   subjectLine.appendChild(subjectSpanContent);
+
+    //create the "timestamp" <p> with two inline <span>s
+   let timestampLine = document.createElement('p');
+   detailedDiv.appendChild(timestampLine);
+     
+    let timestampSpanTitle = document.createElement('span');
+     timestampSpanTitle.textContent = 'Timestamp: ';
+     timestampSpanTitle.style.fontWeight = 'bold';
+     timestampLine.appendChild(timestampSpanTitle);
+  
+    let timestampSpanContent = document.createElement('span');
+    timestampLine.appendChild(timestampSpanContent);
+
+    //create the reply button //TODO attach fucntionality to the button
+    let replyButton = document.createElement('button');
+    detailedDiv.appendChild(replyButton);
+
+    //create the email content field
+
+    let bodyLine = document.createElement('p');
+    replyButton.textContent = 'Reply';
+    replyButton.classList.add('btn', 'btn-primary', 'mb-3'); //adding the Bootstrap style class to the button
+    detailedDiv.appendChild(bodyLine);
+    replyButton.onclick = function(){
+      //TODO call the reply function once it's created 
+    }
+
+
+    //fetch the email
+
+
+    fetch(`/emails/${email_id}`)
+    .then(response => response.json())
+    .then(email => {
+    // populate the span elements with the email content
+
+      fromSpanContent.textContent = email.sender;
+      toSpanContent.textContent = email.recipients;
+      subjectSpanContent.textContent = email.subject;
+      timestampSpanContent.textContent = email.timestamp;
+      bodyLine.textContent = email.body;
+
+});
+
+
+  //mark the email as read - send a PUT request to the relative views route 
+
+}
+
 
