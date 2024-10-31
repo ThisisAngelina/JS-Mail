@@ -59,6 +59,9 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelectorAll('.detailedDiv').forEach((element) => {
+      element.style.display = 'none';
+  });
 
   // Clear what was previously displayed in the mailbox
   document.querySelector('#emails-view').innerHTML = "";
@@ -119,17 +122,10 @@ function load_mailbox(mailbox) {
 //view a particualar email's content
 //the function is called within the laod_mailbox function
 function view_email(email_id){
+  
   //hide all the unneeded divs
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
-
-
-  //clear the detailedView from a previously clicked email
-  if (document.querySelectorAll('.detailedDiv').length != 0) { // if there are already emails being displayed
-    document.querySelectorAll('.detailedDiv').forEach((element) => {
-      element.style.display = 'none';
-    });
-  } else  {
    
   //create a new div for the detailed email view
   let detailedDiv = document.createElement('div');
@@ -191,9 +187,11 @@ function view_email(email_id){
     let replyButton = document.createElement('button');
     detailedDiv.appendChild(replyButton);
 
+    
+
     //create the email content field
 
-    let bodyLine = document.createElement('p');
+    var bodyLine = document.createElement('p');
     replyButton.textContent = 'Reply';
     replyButton.classList.add('btn', 'btn-primary', 'mb-3'); //adding the Bootstrap style class to the button
     detailedDiv.appendChild(bodyLine);
@@ -204,20 +202,60 @@ function view_email(email_id){
 
     //fetch the email
 
-
     fetch(`/emails/${email_id}`)
     .then(response => response.json())
     .then(email => {
     // populate the span elements with the email content
 
-      fromSpanContent.textContent = email.sender;
+      var email_sender = email.sender
+      fromSpanContent.textContent = email_sender;
       toSpanContent.textContent = email.recipients;
       subjectSpanContent.textContent = email.subject;
       timestampSpanContent.textContent = email.timestamp;
       bodyLine.textContent = email.body;
 
+      //create the archive / unarchive button and execute the archiving/unarchiving
+
+    //check that we are NOT in the Sent mailbox
+    if (email_sender != document.querySelector('#authenticated_user').innerHTML){
+      // create the button
+      let archiveButton = document.createElement('button');
+      archiveButton.classList.add('btn', 'btn-secondary', 'mb-3'); 
+      detailedDiv.appendChild(archiveButton);
+
+      // check whether we are viewing an archived or an unarchived email
+      if (email.archived == true){
+        archiveButton.textContent = "Unarchive";
+        archiveButton.onclick = function(){
+          fetch(`/emails/${email_id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: false
+            })
+          });
+          load_mailbox('inbox'); //redirect to the inbox view
+
+        };
+
+      }
+      else {
+        archiveButton.textContent = "Archive";
+        archiveButton.onclick = function(){
+          fetch(`/emails/${email_id}`, {
+            method: 'PUT',
+            body: JSON.stringify({
+                archived: true
+            })
+          });
+          load_mailbox('inbox'); //redirect to the inbox view
+
+        };
+      }
+    }
+
 });
-}; //end of the else block
+
+
   //mark the email as read - send a PUT request to the relative views route 
   fetch(`/emails/${email_id}`, {
     method: 'PUT',
@@ -225,6 +263,8 @@ function view_email(email_id){
         read: true
     })
   })
+
+
 
 }
 
