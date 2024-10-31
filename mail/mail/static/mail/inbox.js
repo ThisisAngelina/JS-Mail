@@ -24,9 +24,25 @@ function compose_email() {
   document.querySelector('#compose-body').value = '';
 }
 
+
+//compose an email - not from scratch, but as a reply to a received email
+function reply(sender, subject, timestamp, body){
+  
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+  document.querySelectorAll('.detailedDiv').forEach((element) => {
+    element.style.display = 'none';
+});
+
+document.querySelector('#compose-recipients').value = sender;
+document.querySelector('#compose-subject').value = 'Re: ' + subject;
+document.querySelector('#compose-body').value = 'On ' + timestamp + ', ' + sender + ' wrote: ' + body;
+
+}
+
+
 //needed to display the submit the form
 function send_email(event) {
-  event.preventDefault(); // Prevent default form submission
   //get the values from the form
   let email_recipients = event.target['compose-recipients'].value; //no need to separate the recipients - this is done in the views.py  
   let email_subject = event.target['compose-subject'].value;
@@ -187,19 +203,13 @@ function view_email(email_id){
     let replyButton = document.createElement('button');
     detailedDiv.appendChild(replyButton);
 
-    
-
     //create the email content field
 
     var bodyLine = document.createElement('p');
     replyButton.textContent = 'Reply';
     replyButton.classList.add('btn', 'btn-primary', 'mb-3'); //adding the Bootstrap style class to the button
     detailedDiv.appendChild(bodyLine);
-    replyButton.onclick = function(){
-      //TODO call the reply function once it's created 
-    }
-
-
+    
     //fetch the email
 
     fetch(`/emails/${email_id}`)
@@ -213,6 +223,10 @@ function view_email(email_id){
       subjectSpanContent.textContent = email.subject;
       timestampSpanContent.textContent = email.timestamp;
       bodyLine.textContent = email.body;
+
+      //asign the onlclick function to the reply button after the email has been fetched
+      replyButton.onclick = () => reply(email.sender, email.subject, email.timestamp, email.body);
+    
 
       //create the archive / unarchive button and execute the archiving/unarchiving
 
