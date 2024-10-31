@@ -52,12 +52,62 @@ function send_email(event) {
 
 }
 
+//function to display received, sent, and archived emails
+
 function load_mailbox(mailbox) {
   
   // Show the mailbox and hide other views
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
 
+  // Clear what was previously displayed in the mailbox
+  document.querySelector('#emails-view').innerHTML = "";
+
   // Show the mailbox name
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  .then(emails => {
+    emails.forEach(email => { //a concise for loop in JS
+      
+      //create an email DIV
+      let emailDiv = document.createElement('div');
+      emailDiv.className = 'emailDiv';
+      emailDiv.style.backgroundColor = email.read ? 'lightgrey' : 'white'; //inline conditional in Javascript: //condition ? iftrue : iffalse//
+      emailDiv.style.border = '1px solid grey';
+      emailDiv.style.padding = '10px';
+      emailDiv.style.marginBottom = '10px';
+
+      //create and populate a sender span inside the email DIV
+      let senderSpan = document.createElement('span');
+      senderSpan.className = "sender"; //we are using class names and not ID names here because IDs are unique, but classes can refer to multiple objects
+      senderSpan.textContent = email.sender; //we can use the textContent property instead of the innerHTML property if we are dealing with plain text.The textContent property ignores HTML tags
+      senderSpan.style.fontWeight = 'bold';
+
+      //create and populate a subject span inside the email DIV
+      let subjectSpan = document.createElement('span');
+      subjectSpan.className = "subject";
+      subjectSpan.textContent = email.subject;
+      subjectSpan.style.marginLeft = '10px';
+
+      //create and populate a timestamp span inside the email DIV
+      let timestampSpan = document.createElement('span');
+      timestampSpan.className = "timestamp";
+      timestampSpan.textContent = email.timestamp;
+      timestampSpan.style.float = 'right'; //anchor the timestamp to the right
+      
+      //append the spans to the div and the div to the emails view
+
+      document.querySelector('#emails-view').appendChild(emailDiv);
+
+      emailDiv.appendChild(senderSpan);
+      emailDiv.appendChild(subjectSpan);
+      emailDiv.appendChild(timestampSpan);
+
+
+    });
+  });
+
 }
+
