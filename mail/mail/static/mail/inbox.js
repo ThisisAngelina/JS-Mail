@@ -120,12 +120,17 @@ function load_mailbox(mailbox) {
 //the function is called within the laod_mailbox function
 function view_email(email_id){
   //hide all the unneeded divs
-  document.querySelector('#emails-view').style.dispaly = 'none';
+  document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
 
 
-  //TODO clear the detailedView from a previously clicked email
-  
+  //clear the detailedView from a previously clicked email
+  if (document.querySelectorAll('.detailedDiv').length != 0) { // if there are already emails being displayed
+    document.querySelectorAll('.detailedDiv').forEach((element) => {
+      element.style.display = 'none';
+    });
+  } else  {
+   
   //create a new div for the detailed email view
   let detailedDiv = document.createElement('div');
   detailedDiv.className = 'detailedDiv';
@@ -212,9 +217,14 @@ function view_email(email_id){
       bodyLine.textContent = email.body;
 
 });
-
-
+}; //end of the else block
   //mark the email as read - send a PUT request to the relative views route 
+  fetch(`/emails/${email_id}`, {
+    method: 'PUT',
+    body: JSON.stringify({
+        read: true
+    })
+  })
 
 }
 
