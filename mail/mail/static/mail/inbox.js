@@ -1,16 +1,15 @@
+//wrapping all functions in DOMContentLoaded
 document.addEventListener('DOMContentLoaded', function() {
 
   // Use buttons to toggle between views
   document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
-  document.querySelector('#compose').addEventListener('click', compose_email);
+  document.querySelector('#compose').addEventListener('click',() => compose_email());
   //process the email when the form is submitted
   document.querySelector('#compose-form').addEventListener('submit', send_email); 
 
-  // By default, load the inbox
-  load_mailbox('inbox');
-});
+
 
 //needed to display the compose view
 function compose_email() {
@@ -22,6 +21,7 @@ function compose_email() {
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+  console.log('compose_email function triggered');
 }
 
 
@@ -43,6 +43,7 @@ document.querySelector('#compose-body').value = 'On ' + timestamp + ', ' + sende
 
 //needed to display the submit the form
 function send_email(event) {
+  event.preventDefault();  // Prevent form from reloading the page (needed to get redirected to the Sent mailbox after an email is sent, for instance)
   //get the values from the form
   let email_recipients = event.target['compose-recipients'].value; //no need to separate the recipients - this is done in the views.py  
   let email_subject = event.target['compose-subject'].value;
@@ -59,13 +60,7 @@ function send_email(event) {
     })
   })
   .then(response => response.json())
-  .then(result => {
-      // Print result
-      console.log("the result of composing an email", result);
-
-      load_mailbox('sent'); //load the list of sent emails
-  });
-
+  .then(() => load_mailbox('sent')); //load the list of sent emails
 }
 
 //function to display received, sent, and archived emails
@@ -101,7 +96,17 @@ function load_mailbox(mailbox) {
       //create and populate a sender span inside the email DIV
       let senderSpan = document.createElement('span');
       senderSpan.className = "sender"; //we are using class names and not ID names here because IDs are unique, but classes can refer to multiple objects
-      senderSpan.textContent = email.sender; //we can use the textContent property instead of the innerHTML property if we are dealing with plain text.The textContent property ignores HTML tags
+      
+      //if we are in the Sent mailbox, display the recipient rather than the sender
+
+      if (document.querySelector('#emails-view').textContent == 'Sent'){
+        senderSpan.textContent = email.recipients; //we can use the textContent property instead of the innerHTML property if we are dealing with plain text.The textContent property ignores HTML tags
+      }
+      else {
+        senderSpan.textContent = email.sender;
+      }
+      
+       
       senderSpan.style.fontWeight = 'bold';
 
       //create and populate a subject span inside the email DIV
@@ -199,7 +204,7 @@ function view_email(email_id){
     let timestampSpanContent = document.createElement('span');
     timestampLine.appendChild(timestampSpanContent);
 
-    //create the reply button //TODO attach fucntionality to the button
+    //create the reply button 
     let replyButton = document.createElement('button');
     detailedDiv.appendChild(replyButton);
 
@@ -247,6 +252,7 @@ function view_email(email_id){
                 archived: false
             })
           });
+          console.log("inbox loading 1 triggered")
           load_mailbox('inbox'); //redirect to the inbox view
 
         };
@@ -261,6 +267,7 @@ function view_email(email_id){
                 archived: true
             })
           });
+          console.log("inbox loading 2 triggered")
           load_mailbox('inbox'); //redirect to the inbox view
 
         };
@@ -281,5 +288,7 @@ function view_email(email_id){
 
 
 }
+
+});
 
 
